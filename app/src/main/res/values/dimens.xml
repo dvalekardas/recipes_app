@@ -1,0 +1,28 @@
+<resources>
+      <dimen name="fab_margin">16dp</dimen>
+    <dimen name="recipe_image_container_height">300dp</dimen>
+    <dimen name="recipe_image_height">300dp</dimen>
+    <dimen name="single_recipe_outer_linear_layout_padding">5dp</dimen>
+    <dimen name="ingredients_height">40dp</dimen>
+    <dimen name="ingredients_text_size">25sp</dimen>
+    <dimen name="ingredients_recycler_view_marginTop">5dp</dimen>
+    <dimen name="ingredients_recycler_view_height">300dp</dimen>
+    <dimen name="how_to_cook_height">40dp</dimen>
+    <dimen name="how_to_cook_text_size">25sp</dimen>
+    <dimen name="how_to_cook_recycler_view_marginTop">5dp</dimen>
+    <dimen name="recipe_item_padding">5dp</dimen>
+    <dimen name="recipe_item_height">150dp</dimen>
+    <dimen name="recipe_item_image_width">150dp</dimen>
+    <dimen name="recipe_item_name_size">30sp</dimen>
+    <dimen name="instruction_item_padding">3dp</dimen>
+    <dimen name="instruction_item_margin_start">2dp</dimen>
+    <dimen name="instruction_item_margin_end">2dp</dimen>
+    <dimen name="instruction_item_text_size">18sp</dimen>
+    <dimen name="ingredient_item_height">32dp</dimen>
+    <dimen name="ingredient_item_text_size">20sp</dimen>
+    <dimen name="recipes_search_view_height">80dp</dimen>
+    <dimen name="recipes_tab_layout_height">40dp</dimen>
+    <dimen name="recipes_material_card_corner_radius">10dp</dimen>
+    <dimen name="recipes_material_card_margin">10dp</dimen>
+    <dimen name="recipes_fetch_error_text_size">20sp</dimen>
+</resources>
