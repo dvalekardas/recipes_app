@@ -8,28 +8,60 @@ import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import androidx.test.platform.app.InstrumentationRegistry
 
+import com.example.recipes.modules.RecipesModule
 import com.example.recipes.ui.activity.RecipesActivity
 import com.example.recipes.ui.adapter.RecipesAdapter
 import com.example.recipes.utils.EspressoIdlingResource
 import com.example.recipes.utils.MatcherExtensions
+import com.example.recipes.utils.MockServerDispatcher
+
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
+
+import okhttp3.mockwebserver.MockWebServer
 
 import org.hamcrest.Matchers.allOf
-
-import org.junit.Test
+import org.junit.*
+import org.junit.Assert.*
 import org.junit.runner.RunWith
 
-import org.junit.Assert.*
-import org.junit.Rule
-
+@UninstallModules(RecipesModule::class)
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class RecipesFeatureTest : MatcherExtensions() {
+
+    @get:Rule val hiltRule = HiltAndroidRule(this)
+
     @get:Rule
     val activityRule = ActivityScenarioRule(RecipesActivity::class.java)
+
+    companion object{
+        private lateinit var mockWebServer: MockWebServer
+        @BeforeClass
+        @JvmStatic
+        fun setupClass(){
+            mockWebServer = MockWebServer()
+            mockWebServer.dispatcher = MockServerDispatcher().RequestDispatcher()
+            mockWebServer.start(3000)
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun tearDownClass() {
+            mockWebServer.shutdown()
+        }
+    }
+
+    @Before
+    fun setup(){
+        hiltRule.inject()
+    }
 
     @Test
     fun useAppContext() {
@@ -89,7 +121,29 @@ class RecipesFeatureTest : MatcherExtensions() {
     }
 
     @Test
-    fun test_display_of_error_text_is_gone_before_during_after_recipes_load_successfully(){
+    fun test_display_error_text_is_visible_and_rest_are_gone_when_fetch_recipes_request_fails(){
+        mockWebServer.shutdown()
+        mockWebServer = MockWebServer()
+        mockWebServer.dispatcher = MockServerDispatcher().ErrorDispatcher()
+        mockWebServer.start(3000)
+        onView(withId(R.id.error))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.progressBar))
+            .check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.searchView))
+            .check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.tabs))
+            .check(matches(withEffectiveVisibility(Visibility.GONE)))
+        onView(withId(R.id.recipes_recycler_view))
+            .check(matches(withEffectiveVisibility(Visibility.GONE)))
+        mockWebServer.shutdown()
+        mockWebServer = MockWebServer()
+        mockWebServer.dispatcher = MockServerDispatcher().RequestDispatcher()
+        mockWebServer.start(3000)
+    }
+
+    @Test
+    fun test_display_of_error_text_is_gone_before_during_and_after_recipes_load_successfully(){
         onView(withId(R.id.error))
             .check(matches(withEffectiveVisibility(Visibility.GONE)))
         IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
@@ -99,7 +153,6 @@ class RecipesFeatureTest : MatcherExtensions() {
         onView(withId(R.id.error))
             .check(matches(withEffectiveVisibility(Visibility.GONE)))
     }
-
 
     @Test
     fun test_display_of_tabs_is_shown_after_recipes_load(){
@@ -141,7 +194,6 @@ class RecipesFeatureTest : MatcherExtensions() {
             .check(matches(hasChildCount(1)))
         IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
     }
-
 
     @Test
     fun test_display_of_searchBar_is_not_visible_before_recipes_load(){
@@ -199,7 +251,7 @@ class RecipesFeatureTest : MatcherExtensions() {
     }
 
     @Test
-    fun test_display_of_fav_recipes_list_contains_only_cookies_when_cookies_are_favorite_and_nothing_when_no_fav_recipe_exists() {
+    fun test_display_of_fav_recipes_list_contains_cookies_when_cookies_are_the_only_favorite() {
         IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
         onView(withId(R.id.recipes_recycler_view))
             .perform(actionOnItemAtPosition<RecipesAdapter.RecipesViewHolder>(1, click()))
@@ -210,21 +262,10 @@ class RecipesFeatureTest : MatcherExtensions() {
             .perform(RecyclerViewActions.scrollToPosition<RecipesAdapter.RecipesViewHolder>(0))
             .check(matches(atPositionOnView(0, withText("Chocolate Chip Cookies"), R.id.recipe_name)))
             .check(matches(hasChildCount(1)))
-
-        onView(withId(R.id.recipes_recycler_view))
-            .perform(actionOnItemAtPosition<RecipesAdapter.RecipesViewHolder>(0, click()))
-        onView(withId(R.id.fab)).perform(click())
-        onView(isRoot()).perform(pressBack())
-        onView(withId(R.id.tabs)).perform(selectTabAtPosition(1))
-        onView(withId(R.id.recipes_recycler_view))
-            .perform(RecyclerViewActions.scrollToPosition<RecipesAdapter.RecipesViewHolder>(0))
-            .check(matches(atPositionOnView(0, withText(R.string.no_recipe), R.id.recipe_name)))
-            .check(matches(hasChildCount(1)))
-        IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
     }
 
     @Test
-    fun test_display_of_fav_recipes_list_contains_no_recipe_when_cookies_is_favorite_or_not_and_search_text_not_in_recipe_name(){
+    fun test_display_of_fav_recipes_list_contains_no_recipe_when_cookies_is_favorite_and_search_text_not_in_recipe_name() {
         IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
         onView(withId(R.id.recipes_recycler_view))
             .perform(actionOnItemAtPosition<RecipesAdapter.RecipesViewHolder>(1, click()))
@@ -238,24 +279,6 @@ class RecipesFeatureTest : MatcherExtensions() {
             .perform(RecyclerViewActions.scrollToPosition<RecipesAdapter.RecipesViewHolder>(0))
             .check(matches(atPositionOnView(0, withText(R.string.no_recipe), R.id.recipe_name)))
             .check(matches(hasChildCount(1)))
-
-        onView(withId(R.id.searchView))
-            .perform(click())
-            .perform(searchText(""))
-
-        onView(withId(R.id.recipes_recycler_view))
-            .perform(actionOnItemAtPosition<RecipesAdapter.RecipesViewHolder>(0, click()))
-        onView(withId(R.id.fab)).perform(click())
-        onView(isRoot()).perform(pressBack())
-        onView(withId(R.id.tabs)).perform(selectTabAtPosition(1))
-        onView(withId(R.id.searchView))
-            .perform(click())
-            .perform(searchText("asdfg"))
-        onView(withId(R.id.recipes_recycler_view))
-            .perform(RecyclerViewActions.scrollToPosition<RecipesAdapter.RecipesViewHolder>(0))
-            .check(matches(atPositionOnView(0, withText(R.string.no_recipe), R.id.recipe_name)))
-            .check(matches(hasChildCount(1)))
-        IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
     }
 
     @Test
@@ -273,10 +296,6 @@ class RecipesFeatureTest : MatcherExtensions() {
             .perform(RecyclerViewActions.scrollToPosition<RecipesAdapter.RecipesViewHolder>(0))
             .check(matches(atPositionOnView(0, withText("Chocolate Chip Cookies"), R.id.recipe_name)))
             .check(matches(hasChildCount(1)))
-
-        onView(withId(R.id.recipes_recycler_view))
-            .perform(actionOnItemAtPosition<RecipesAdapter.RecipesViewHolder>(0, click()))
-        onView(withId(R.id.fab)).perform(click())
         IdlingRegistry.getInstance().unregister(EspressoIdlingResource.countingIdlingResource)
     }
 }

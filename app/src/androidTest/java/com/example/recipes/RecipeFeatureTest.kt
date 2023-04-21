@@ -10,24 +10,53 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 
+import com.example.recipes.modules.RecipesModule
 import com.example.recipes.ui.activity.RecipesActivity
 import com.example.recipes.ui.adapter.RecipesAdapter
 import com.example.recipes.utils.EspressoIdlingResource
 import com.example.recipes.utils.MatcherExtensions
+import com.example.recipes.utils.MockServerDispatcher
 
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
+
+import okhttp3.mockwebserver.MockWebServer
+
+import org.junit.*
 import org.junit.runner.RunWith
 
+@UninstallModules(RecipesModule::class)
+@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class RecipeFeatureTest : MatcherExtensions() {
+
+    @get:Rule val hiltRule = HiltAndroidRule(this)
+
     @get:Rule
     val activityRule = ActivityScenarioRule(RecipesActivity::class.java)
 
+    companion object{
+        private lateinit var mockWebServer: MockWebServer
+        @BeforeClass
+        @JvmStatic
+        fun setupClass(){
+            mockWebServer = MockWebServer()
+            mockWebServer.dispatcher = MockServerDispatcher().RequestDispatcher()
+            mockWebServer.start(3000)
+        }
+
+        @AfterClass
+        @JvmStatic
+        fun tearDownClass() {
+            mockWebServer.shutdown()
+        }
+    }
+
     @Before
     fun setup(){
+        hiltRule.inject()
         IdlingRegistry.getInstance().register(EspressoIdlingResource.countingIdlingResource)
         onView(withId(R.id.recipes_recycler_view))
             .perform(
@@ -131,7 +160,7 @@ class RecipeFeatureTest : MatcherExtensions() {
     }
 
     @Test
-    fun test_ingredients_list_is_hidden_and_shown_when_ingredients_expand_and_collapse_icon_is_clicked(){
+    fun test_ingredients_list_is_hidden_and_shown_when_expand_and_collapse_icon_is_clicked(){
         onView(withId(R.id.expanded_ingredients))
             .perform(click())
         onView(withId(R.id.ingredients_recycler_view))
@@ -143,7 +172,7 @@ class RecipeFeatureTest : MatcherExtensions() {
     }
 
     @Test
-    fun test_cooking_steps_list_is_hidden_and_shown_when_steps_expand_and_collapse_icon_is_clicked(){
+    fun test_cooking_steps_list_is_hidden_and_shown_when_expand_and_collapse_icon_is_clicked(){
         onView(withId(R.id.expanded_steps))
             .perform(click())
         onView(withId(R.id.steps_recycler_view))
