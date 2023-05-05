@@ -25,4 +25,23 @@
     <dimen name="recipes_material_card_corner_radius">10dp</dimen>
     <dimen name="recipes_material_card_margin">10dp</dimen>
     <dimen name="recipes_fetch_error_text_size">20sp</dimen>
+    <dimen name="ingredient_margin_bottom">2sp</dimen>
+    <dimen name="ingredient_text_size">20sp</dimen>
+    <dimen name="ingredient_delete_button_width">20dp</dimen>
+    <dimen name="ingredient_delete_button_height">20dp</dimen>
+    <dimen name="ingredient_edittext_margin">5dp</dimen>
+    <dimen name="instruction_margin_bottom">2sp</dimen>
+    <dimen name="instruction_text_size">20sp</dimen>
+    <dimen name="instruction_delete_button_width">20dp</dimen>
+    <dimen name="instruction_delete_button_height">20dp</dimen>
+    <dimen name="instruction_edittext_margin">5dp</dimen>
+    <dimen name="add_recipe_heading_padding">15dp</dimen>
+    <dimen name="add_recipe_cancel_text_size">20sp</dimen>
+    <dimen name="add_recipe_done_text_size">20sp</dimen>
+    <dimen name="add_new_recipe_text_size">25sp</dimen>
+    <dimen name="add_recipe_title_top_bottom_margin">20dp</dimen>
+    <dimen name="add_recipe_title_start_end_margin">10dp</dimen>
+    <dimen name="add_recipe_title_size">22sp</dimen>
+    <dimen name="add_recipe_photo_layout_margin">20dp</dimen>
+    <dimen name="recipe_photo_text_size">18sp</dimen>
 </resources>
