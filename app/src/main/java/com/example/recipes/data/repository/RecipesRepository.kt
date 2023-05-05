@@ -1,6 +1,6 @@
 package com.example.recipes.data.repository
 
-import com.example.recipes.data.local.FavoriteRecipeEntity
+import com.example.recipes.data.model.FavoriteRecipeEntity
 import com.example.recipes.data.local.RecipeDataDao
 import com.example.recipes.data.model.Recipe
 import com.example.recipes.data.remote.RecipesApiService
@@ -22,6 +22,12 @@ class RecipesRepository
 
     suspend fun getFavoriteRecipes(): MutableList<FavoriteRecipeEntity>{
         return recipeDataDao.getFavoriteRecipes()
+    }
+
+    suspend fun addRecipe(newRecipe: Recipe) = recipeDataDao.addRecipe(newRecipe)
+
+    suspend fun getSavedRecipesFromDB(): MutableList<Recipe>{
+        return recipeDataDao.getSavedRecipesFromDB()
     }
 
 }

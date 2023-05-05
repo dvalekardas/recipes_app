@@ -1,7 +1,7 @@
 package com.example.recipes
 
 import android.database.SQLException
-import com.example.recipes.data.local.FavoriteRecipeEntity
+import com.example.recipes.data.model.FavoriteRecipeEntity
 import com.example.recipes.data.local.RecipeDataDao
 import com.example.recipes.utils.BaseTest
 import com.example.recipes.mockData.expectedRecipesData

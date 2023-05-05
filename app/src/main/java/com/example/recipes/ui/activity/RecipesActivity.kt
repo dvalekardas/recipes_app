@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.example.recipes.R
 import com.example.recipes.data.model.Recipe
+import com.example.recipes.ui.fragment.AddRecipeFragment
 import com.example.recipes.ui.fragment.RecipesFragment
 import com.example.recipes.ui.fragment.SingleRecipeFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,5 +31,13 @@ class RecipesActivity : AppCompatActivity() {
                 .addToBackStack(null)
                 .commit()
         }
+    }
+
+    fun openAddRecipe(){
+        val addRecipeFragment = AddRecipeFragment.newInstance()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.recipes_container, addRecipeFragment)
+            .addToBackStack(null)
+            .commit()
     }
 }

@@ -4,6 +4,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipes.databinding.InstructionItemBinding
+import java.util.*
+import kotlin.collections.ArrayList
+
 class InstructionsAdapter(private val instructions: ArrayList<String>): RecyclerView.Adapter<InstructionsAdapter.InstructionsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InstructionsViewHolder {
@@ -24,7 +27,10 @@ class InstructionsAdapter(private val instructions: ArrayList<String>): Recycler
 
     inner class InstructionsViewHolder(private val binding: InstructionItemBinding): RecyclerView.ViewHolder(binding.root){
         fun bind(instruction: String){
-            binding.instruction.text = instruction
+            binding.instruction.text  =
+                instruction.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                }
         }
     }
 }

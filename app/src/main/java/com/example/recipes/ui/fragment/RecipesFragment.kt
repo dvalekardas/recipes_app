@@ -1,8 +1,9 @@
 package com.example.recipes.ui.fragment
 
 import android.os.Bundle
-import android.view.*
-import android.view.GestureDetector.SimpleOnGestureListener
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
@@ -21,7 +22,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class RecipesFragment : Fragment() {
     private lateinit var binding: FragmentRecipesBinding
     private lateinit var recipesAdapter: RecipesAdapter
-    private lateinit var gestureDetector: GestureDetector
     companion object {
         fun newInstance() = RecipesFragment()
     }
@@ -34,23 +34,28 @@ class RecipesFragment : Fragment() {
     ): View {
         binding = FragmentRecipesBinding.inflate(layoutInflater)
 
+        binding.fab.setOnClickListener {
+            (activity as RecipesActivity).openAddRecipe()
+        }
+        handleRefreshLayout()
         viewModel.recipes.observe(viewLifecycleOwner){
-            if(it.isNotEmpty()){
-                viewModel.getFavoriteRecipes()
-                setRecipesAdapter(it)
-                setUIElementsWhenRecipesNotEmpty()
-                handleSearchView()
-                handleToggleButton()
-               // handleGestures()
-            }else if(viewModel.error.value == false){
-                viewModel.fetchRecipes()
-                binding.refresh.isRefreshing = false
-                setSwipeRefreshLayout(it)
-            }
+                if(it.isNotEmpty()){
+                    viewModel.getFavoriteRecipes()
+                    setRecipesAdapter(it)
+                    setUIElementsWhenRecipesNotEmpty()
+                    handleSearchView()
+                    handleToggleButton()
+                }else if((viewModel.error.value == false) || it.isEmpty()){
+                    if(viewModel.createRecipesFragment.value == true){
+                        viewModel.fetchRecipes()
+                        viewModel.addSavedRecipesFromDB()
+                        binding.refresh.isRefreshing = false
+                    }
+                }
         }
 
         viewModel.error.observe(viewLifecycleOwner){
-            if(it){
+            if(it && viewModel.recipes.value!!.isEmpty()){
                 setUIElementsWhenErrorOccurs()
             }else{
                 binding.error.visibility = View.GONE
@@ -58,7 +63,7 @@ class RecipesFragment : Fragment() {
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner){
-            if(it){
+            if(it && viewModel.recipes.value!!.isEmpty()){
                 setUIElementsWhenLoading()
             }else{
                 binding.progressBar.visibility = View.GONE
@@ -66,14 +71,10 @@ class RecipesFragment : Fragment() {
         }
 
         viewModel.toastMessage.observe(viewLifecycleOwner){
-            Toast.makeText(context, getString(it), Toast.LENGTH_SHORT).show()
+            if(viewModel.createRecipesFragment.value == true || viewModel.recipeAdded.value == true) {
+                Toast.makeText(context, getString(it), Toast.LENGTH_SHORT).show()
+            }
         }
-//        val view = binding.root
-//        view.setOnTouchListener(object : View.OnTouchListener {
-//            override fun onTouch(view: View?, motionEvent: MotionEvent?): Boolean {
-//                return gestureDetector.onTouchEvent(motionEvent!!)
-//            }
-//        })
         return binding.root
     }
 
@@ -83,6 +84,7 @@ class RecipesFragment : Fragment() {
         binding.progressBar.visibility = View.VISIBLE
         binding.searchView.visibility = View.GONE
         binding.tabsView.visibility = View.GONE
+        binding.fab.visibility = View.GONE
     }
 
     private fun setUIElementsWhenErrorOccurs() {
@@ -92,16 +94,17 @@ class RecipesFragment : Fragment() {
         binding.progressBar.visibility = View.GONE
         binding.searchView.visibility = View.GONE
         binding.tabsView.visibility = View.GONE
+        binding.fab.visibility = View.VISIBLE
     }
 
     private fun setUIElementsWhenRecipesNotEmpty() {
         binding.refresh.isRefreshing = false
-        binding.refresh.isEnabled = false
         binding.recipesRecyclerView.visibility = View.VISIBLE
         binding.error.visibility = View.GONE
         binding.progressBar.visibility = View.GONE
         binding.searchView.visibility = View.VISIBLE
         binding.tabsView.visibility = View.VISIBLE
+        binding.fab.visibility = View.VISIBLE
     }
 
     private fun setRecipesAdapter(recipeList:List<Recipe>){
@@ -119,15 +122,11 @@ class RecipesFragment : Fragment() {
         })
     }
 
-    private fun setSwipeRefreshLayout(recipeList:List<Recipe>) {
+    private fun handleRefreshLayout() {
+        binding.refresh.isEnabled = true
         binding.refresh.setOnRefreshListener {
-            if(recipeList.isEmpty()){
-                binding.refresh.isEnabled = true
-                viewModel.fetchRecipes()
-            }else{
-                binding.refresh.isEnabled = false
-                binding.refresh.isRefreshing = false
-            }
+            viewModel.initialize()
+            binding.refresh.isRefreshing = false
         }
     }
 
@@ -180,7 +179,6 @@ class RecipesFragment : Fragment() {
                 } }
                 return true
             }
-
         })
     }
 
@@ -192,10 +190,12 @@ class RecipesFragment : Fragment() {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 if (tab != null) {
                     if(tab.text =="All"){
+                        binding.fab.visibility = View.VISIBLE
                         viewModel.changeFavoriteOnlyState()
                         viewModel.favoriteRecipes.value?.
                         let { context?.let { context -> recipesAdapter.filterRecipes(context, binding.searchView.query.toString(), false, it) } }
                     }else{
+                        binding.fab.visibility = View.GONE
                         viewModel.changeFavoriteOnlyState()
                         viewModel.favoriteRecipes.value?.
                         let { context?.let { context -> recipesAdapter.filterRecipes(context, binding.searchView.query.toString(), true, it) } }
@@ -207,36 +207,8 @@ class RecipesFragment : Fragment() {
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
     }
-    
-    private fun handleGestures(){
-        gestureDetector = GestureDetector((activity as RecipesActivity), object : SimpleOnGestureListener() {
-            override fun onFling(
-                e1: MotionEvent,
-                e2: MotionEvent,
-                velocityX: Float,
-                velocityY: Float
-            ): Boolean {
-                if (e1.x < e2.x) {
-                    // Swiped right
-                    showAllRecipes()
-                } else if (e1.x > e2.x) {
-                    // Swiped left
-                    showFavoriteRecipes()
-                }
-                return true
-            }
-        })
-    }
-
-    private fun showAllRecipes(){
-        binding.tabs.selectTab(binding.tabs.getTabAt(0))
-//        viewModel.favoriteRecipes.value?.
-//        let { recipesAdapter.filterRecipes(binding.searchView.query.toString(), false, it) }
-    }
 
     private fun showFavoriteRecipes(){
         binding.tabs.selectTab(binding.tabs.getTabAt(1))
-//        viewModel.favoriteRecipes.value?.
-//        let { recipesAdapter.filterRecipes(binding.searchView.query.toString(), true, it) }
     }
 }

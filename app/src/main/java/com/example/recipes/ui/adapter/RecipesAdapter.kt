@@ -2,12 +2,12 @@ package com.example.recipes.ui.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recipes.R
-import com.example.recipes.data.local.FavoriteRecipeEntity
+import com.example.recipes.data.model.FavoriteRecipeEntity
 import com.example.recipes.data.model.Recipe
 import com.example.recipes.databinding.RecipeItemBinding
 import com.example.recipes.utils.UrlConstants
@@ -70,9 +70,16 @@ class RecipesAdapter(private var recipes: ArrayList<Recipe>): RecyclerView.Adapt
 
     inner class RecipesViewHolder(private val binding: RecipeItemBinding):RecyclerView.ViewHolder(binding.root){
         fun bind(recipe: Recipe){
-            binding.recipeName.text = recipe.name
+            val recipeName = recipe.name.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+            }
+            binding.recipeName.text = recipeName
             try{
-                Picasso.get().load(recipe.imgUrl).into(binding.recipeImageThumbnail)
+                if(recipe.imgUrl.startsWith("http")){
+                    Picasso.get().load(recipe.imgUrl).into(binding.recipeImageThumbnail)
+                }else{
+                    Picasso.get().load(recipe.imgUrl.toUri()).into(binding.recipeImageThumbnail)
+                }
             }catch (e: Exception){
                 Picasso.get().load(UrlConstants.DEFAULT_IMG).into(binding.recipeImageThumbnail)
             }

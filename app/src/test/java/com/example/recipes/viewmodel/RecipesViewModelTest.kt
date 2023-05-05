@@ -1,6 +1,6 @@
 package com.example.recipes
 
-import com.example.recipes.data.local.FavoriteRecipeEntity
+import com.example.recipes.data.model.FavoriteRecipeEntity
 import com.example.recipes.utils.BaseTest
 import com.example.recipes.mockData.expectedRecipesData
 import com.example.recipes.data.repository.RecipesRepository

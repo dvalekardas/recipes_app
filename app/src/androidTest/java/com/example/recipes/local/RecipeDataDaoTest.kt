@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.example.recipes.data.local.FavoriteRecipeEntity
+import com.example.recipes.data.model.FavoriteRecipeEntity
 import com.example.recipes.data.local.RecipeDataDao
 import com.example.recipes.data.local.RecipeDatabase
 import com.example.recipes.mockData.expectedRecipesData

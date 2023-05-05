@@ -6,12 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.recipes.R
-import com.example.recipes.data.local.FavoriteRecipeEntity
+import com.example.recipes.data.model.FavoriteRecipeEntity
 import com.example.recipes.data.model.Recipe
 
 import com.example.recipes.data.viewmodel.RecipesViewModel
@@ -23,6 +24,8 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.AppBarLayout.OnOffsetChangedListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.squareup.picasso.Picasso
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
 
 
@@ -48,32 +51,47 @@ class SingleRecipeFragment : Fragment() {
         handleFAB()
         handleAppBar()
         handleArrowBackButton()
-        setIngredientsAdapter(recipe.ingredients)
-        setStepsToCookAdapter(recipe.instructions)
+        recipe.ingredients?.let { setIngredientsAdapter(it) }
+        recipe.instructions?.let { setStepsToCookAdapter(it) }
         handleExpandCollapseIcons()
         return binding.root
     }
 
     private fun setIngredientsAdapter(ingredients: List<String>) {
-        val ingredientsAdapter = IngredientsAdapter(ingredients as ArrayList<String>)
-        binding.ingredientsRecyclerView.adapter =  ingredientsAdapter
-        binding.ingredientsRecyclerView.layoutManager= LinearLayoutManager(requireContext())
-        binding.ingredientsRecyclerView.addItemDecoration(
-            DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL)
-        )
+        if(ingredients.isNotEmpty()){
+            val ingredientsArrayList = ArrayList<String>()
+            ingredientsArrayList.addAll(ingredients)
+            val ingredientsAdapter = IngredientsAdapter(ingredientsArrayList)
+            binding.ingredientsRecyclerView.adapter =  ingredientsAdapter
+            binding.ingredientsRecyclerView.layoutManager= LinearLayoutManager(requireContext())
+            binding.ingredientsRecyclerView.addItemDecoration(
+                DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL)
+            )
+        }
     }
 
     private fun setStepsToCookAdapter(instructions: List<String>) {
-        val ingredientsAdapter = InstructionsAdapter(instructions as ArrayList<String>)
-        binding.stepsRecyclerView.adapter =  ingredientsAdapter
-        binding.stepsRecyclerView.layoutManager= LinearLayoutManager(requireContext())
+        if(instructions.isNotEmpty()){
+            val instructionsArrayList = ArrayList<String>()
+            instructionsArrayList.addAll(instructions)
+            val ingredientsAdapter = InstructionsAdapter(instructionsArrayList)
+            binding.stepsRecyclerView.adapter =  ingredientsAdapter
+            binding.stepsRecyclerView.layoutManager= LinearLayoutManager(requireContext())
+        }
     }
 
     private fun setToolBar(){
         val toolBar: Toolbar = binding.toolbar
-        Picasso.get().load(recipe.imgUrl).into(binding.recipeImage)
+        if(recipe.imgUrl.startsWith("http")){
+            Picasso.get().load(recipe.imgUrl).into(binding.recipeImage)
+        }else{
+            Picasso.get().load(recipe.imgUrl.toUri()).into(binding.recipeImage)
+        }
         (activity as RecipesActivity).setSupportActionBar(toolBar)
-        toolBar.title = recipe.name
+        val recipeName = recipe.name.replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+        }
+        toolBar.title = recipeName
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             toolBar.tooltipText =  recipe.name
         }
