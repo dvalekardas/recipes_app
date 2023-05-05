@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/instructions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:lines="1"
+        android:maxLines="15"
+        android:hint="@string/insert_instructions"
+        android:layout_marginBottom="@dimen/instruction_edittext_margin"
+        android:layout_marginTop="@dimen/instruction_edittext_margin"
+        android:layout_marginStart="@dimen/instruction_edittext_margin"
+        android:layout_marginEnd="@dimen/instruction_edittext_margin"
+        android:scrollbars="vertical"/>
+</LinearLayout>

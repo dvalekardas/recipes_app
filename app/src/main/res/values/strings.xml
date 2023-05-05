@@ -20,5 +20,17 @@
     <string name="favorite_recipe_add_error">Could not add recipe to favorites</string>
     <string name="favorite_recipe_remove_error">Could not remove recipe from favorites</string>
     <string name="no_recipe">No recipe found</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+    <string name="add_new_recipe">Add New Recipe</string>
+    <string name="recipe_title">Recipe Title...</string>
+    <string name="recipe_photo">Recipe Photo:</string>
+    <string name="ingredients_">Ingredients:</string>
+    <string name="insert_ingredients">Insert Ingredients</string>
+    <string name="insert_instructions">Insert Instructions</string>
+    <string name="instructions">Instructions:</string>
+    <string name="add_new_recipe_success">Recipe was added successfully</string>
+    <string name="add_new_recipe_error">Failed to add recipe</string>
+    <string name="mandatory_recipe">Recipe name is mandatory</string>
 
 </resources>

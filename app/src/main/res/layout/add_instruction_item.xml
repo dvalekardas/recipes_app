@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/recipe_item_layout"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/ingredient_item_height"
+    android:orientation="horizontal"
+    tools:ignore="UseCompoundDrawables">
+    <TextView
+        android:layout_marginBottom="@dimen/instruction_margin_bottom"
+        android:id="@+id/instruction"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="2"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textSize="@dimen/ingredient_item_text_size"
+        android:textStyle="bold"
+        tools:text="Bake for 20 min"
+        tools:textSize="@dimen/instruction_text_size"
+        tools:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/delete"
+        android:layout_gravity="center_vertical"
+        android:layout_width="@dimen/instruction_delete_button_width"
+        android:layout_height="@dimen/instruction_delete_button_height"
+        android:src="@drawable/close"
+        tools:ignore="ContentDescription"/>
+</LinearLayout>
