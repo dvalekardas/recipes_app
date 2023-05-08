@@ -1,13 +1,15 @@
 # recipes_app
-This is a small android application that shows recipes. User can filter them with search bar or mark them as favorite. Each recipe constists of instructions and ingredients.
+This is a small android application that shows recipes. User can filter them with search bar or mark them as favorite. Each recipe constists of instructions and ingredients. User can add its own recipe.
 
 ## Aplication details
 
-The application is consisted of 2 screens. 
+The application is consisted of 3 screens. 
 
 - First screen contains the list of the recipes. User can toggle between all recipes and favorite recipes. User can also use the search bar to filter the recipes that appear on the screen.
 
 - Second screen is the recipe screen. It is consisted of a photo of the recipe the title and the description. Cooking instructions and ingredients apart the description. User can save/remove a recipe to/from favorites. 
+
+- Third screen is the "Add Recipe Screen". It is triggered by floating action button(+), where user can add recipe title, recipe photo from camera or gallery, ingredients and instructions
 
 ## Technology used
 
@@ -15,7 +17,7 @@ The application is developed in Android Native with Kotlin. It uses a Single Act
 
 ## Deployment instructions
 
-The application loads the data from a mock API. You can deploy your own mock API easily with the use of [Mockoon](https://mockoon.com/download/).
+The application loads the data from a mock API and local mobile DB. You can deploy your own mock API easily with the use of [Mockoon](https://mockoon.com/download/).
 
 Here is some sample data that can be used to populate the application with: 
 ```json
