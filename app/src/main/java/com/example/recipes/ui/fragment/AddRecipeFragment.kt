@@ -1,6 +1,5 @@
 package com.example.recipes.ui.fragment
 
-import android.annotation.SuppressLint
 import android.app.Activity
 
 import android.content.Intent
@@ -10,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,7 +24,6 @@ import com.example.recipes.data.model.Recipe
 import com.example.recipes.data.viewmodel.AddRecipeViewModel
 import com.example.recipes.data.viewmodel.RecipesViewModel
 import com.example.recipes.databinding.FragmentAddRecipeBinding
-import com.example.recipes.ui.activity.RecipesActivity
 import com.example.recipes.ui.adapter.AddIngredientsAdapter
 import com.example.recipes.ui.adapter.AddInstructionsAdapter
 import com.example.recipes.ui.dialogFragment.IngredientsDialogFragment
@@ -34,7 +33,6 @@ import com.example.recipes.utils.UrlConstants.DEFAULT_IMG
 import com.squareup.picasso.Picasso
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
-import java.util.*
 import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
@@ -107,6 +105,8 @@ class AddRecipeFragment: Fragment() {
                 }
             }
         }
+
+        requireActivity().onBackPressedDispatcher.addCallback(this, cancelCallback)
         super.onCreate(savedInstanceState)
     }
 
@@ -136,39 +136,51 @@ class AddRecipeFragment: Fragment() {
 
     private fun handleCancelButton() {
         binding.cancel.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
+    private val cancelCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
             recipesViewModel.preventRecipeFragmentRecreation()
             recipesViewModel.preventRecipeToast()
             if(recipesViewModel.recipes.value!!.isEmpty()){
                 recipesViewModel.setErrorValue()
             }
-            (activity as RecipesActivity).onBackPressedDispatcher.onBackPressed()
+            requireActivity().supportFragmentManager.popBackStack()
         }
     }
 
-    @SuppressLint("SimpleDateFormat")
-    private fun handleDoneButton() {
-       binding.done.setOnClickListener {
-           if(binding.editRecipeTitle.text.isEmpty() || binding.editRecipeTitle.text.isBlank()){
-               Toast.makeText(requireContext(), R.string.mandatory_recipe, Toast.LENGTH_SHORT).show()
-           }else{
-               val timeStamp: Long = System.currentTimeMillis()/1000  //seconds
-               val newRecipe = Recipe(
-                   timeStamp.toInt(),
-                   binding.editRecipeTitle.text.toString(),
-                   addRecipeViewModel.recipePhotoPath.value.toString(),
-                   addRecipeViewModel.instructions.value?.toList(),
-                   addRecipeViewModel.ingredients.value?.toList(),
-               )
-               if(recipesViewModel.recipes.value!!.isNotEmpty()){
-                   recipesViewModel.preventRecipeFragmentRecreation()
-               }else{
-                   recipesViewModel.allowRecipeFragmentRecreation()
-               }
-               recipesViewModel.addRecipe(newRecipe)
-               (activity as RecipesActivity).onBackPressedDispatcher.onBackPressed()
-           }
+    private val doneCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            if(binding.editRecipeTitle.text.isEmpty() || binding.editRecipeTitle.text.isBlank()){
+                Toast.makeText(requireContext(), R.string.mandatory_recipe, Toast.LENGTH_SHORT).show()
+            }else{
+                val timeStamp: Long = System.currentTimeMillis()/1000  //seconds
+                val newRecipe = Recipe(
+                    timeStamp.toInt(),
+                    binding.editRecipeTitle.text.toString(),
+                    addRecipeViewModel.recipePhotoPath.value.toString(),
+                    addRecipeViewModel.instructions.value?.toList(),
+                    addRecipeViewModel.ingredients.value?.toList(),
+                )
+                if(recipesViewModel.recipes.value!!.isNotEmpty()){
+                    recipesViewModel.preventRecipeFragmentRecreation()
+                }else{
+                    recipesViewModel.allowRecipeFragmentRecreation()
+                }
+                recipesViewModel.addRecipe(newRecipe)
+                requireActivity().supportFragmentManager.popBackStack()
+            }
+        }
+    }
 
-       }
+    private fun handleDoneButton() {
+        binding.done.setOnClickListener {
+            cancelCallback.remove()
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, doneCallback)
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
     }
 
     private fun handleAddRecipePhoto() {
